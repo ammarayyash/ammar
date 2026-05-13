@@ -34,11 +34,12 @@
     </div>
 
     <div class="canvas-wrapper">
-      <p style="margin-bottom:16px; color:#d1d5db; line-height:1.6;">
-        <strong>Pen Tool:</strong> Klik untuk anchor point, drag untuk kurva Bezier.
-        <strong>Direct Selection:</strong> Geser titik atau handle untuk edit.
-        <strong>Smooth Curve:</strong> Drag untuk kurva halus. Skor minimal 70 untuk lanjut.
-      </p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin-bottom:18px;">
+        <div style="padding:12px;border-radius:12px;background:rgba(255,255,255,0.05);color:#f8fafc;font-size:0.95rem;line-height:1.5;">Pen Tool: Klik untuk anchor point, drag untuk kurva Bezier.</div>
+        <div style="padding:12px;border-radius:12px;background:rgba(255,255,255,0.05);color:#f8fafc;font-size:0.95rem;line-height:1.5;">Direct Selection: Geser titik atau handle untuk edit.</div>
+        <div style="padding:12px;border-radius:12px;background:rgba(255,255,255,0.05);color:#f8fafc;font-size:0.95rem;line-height:1.5;">Smooth Curve: Drag untuk kurva halus otomatis.</div>
+        <div style="padding:12px;border-radius:12px;background:rgba(255,255,255,0.05);color:#f8fafc;font-size:0.95rem;line-height:1.5;">Goal: Capai skor ≥ 70 untuk lanjut.</div>
+      </div>
       <canvas id="myCanvas" width="800" height="600"></canvas>
       <div class="toolbar">
         <button class="tool-btn active" id="pen-tool">Pen Tool</button>

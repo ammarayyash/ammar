@@ -190,6 +190,8 @@ def logout_view(request):
 @login_required(login_url='login')
 def kursus(request):
     courses = Course.objects.filter(is_active=True).order_by('order')
+    if not courses.exists():
+        courses = Course.objects.all().order_by('order')
     return render(request, 'dashboard/kursus.html', {
         'profile': request.user.userprofile,
         'courses': courses
@@ -691,7 +693,8 @@ def materi_view(request, mission_id):
     else:
         media_modul_dir = os.path.join(settings.MEDIA_ROOT, 'modul')
         if os.path.exists(media_modul_dir):
-            for filename in os.listdir(media_modul_dir):
+            module_files = [f for f in os.listdir(media_modul_dir) if os.path.isfile(os.path.join(media_modul_dir, f))]
+            for filename in module_files:
                 # Check for various naming patterns
                 if (filename.lower().startswith(f'modul{mission.order}') or 
                     filename.lower().startswith(f'level{mission.order}') or
@@ -700,6 +703,11 @@ def materi_view(request, mission_id):
                     file_url = f"{settings.MEDIA_URL}{file_path}"
                     module_info = build_module_info(filename, file_url)
                     break
+            if not module_info and module_files:
+                filename = module_files[0]
+                file_path = os.path.join('modul', filename)
+                file_url = f"{settings.MEDIA_URL}{file_path}"
+                module_info = build_module_info(filename, file_url)
     
     context = {
         'mission': mission,

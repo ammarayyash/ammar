@@ -394,10 +394,11 @@
                 <h3 style="margin-bottom: 16px; color: var(--accent);"><i class="fa-solid fa-file-pdf"></i> Modul Pembelajaran: {{ module_info.filename }}</h3>
                 
                 {% if module_info.embed_type == 'pdf' %}
-                <div style="width: 100%; height: 600px; border: 1px solid var(--panel-border); border-radius: 12px; overflow: hidden; margin-bottom: 16px; background: var(--bg-primary);">
-                    <object data="{{ module_info.embed_url }}" type="application/pdf" width="100%" height="100%">
-                        <p>Browser Anda tidak mendukung preview PDF. <a href="{{ module_info.file_url }}" target="_blank">Klik di sini untuk membuka PDF</a></p>
-                    </object>
+                <div style="width: 100%; height: 640px; border: 1px solid var(--panel-border); border-radius: 12px; overflow: hidden; margin-bottom: 16px; background: var(--bg-primary);">
+                    <iframe src="{{ module_info.embed_url }}" width="100%" height="100%" style="border: none; min-height: 640px;"></iframe>
+                </div>
+                <div style="margin-bottom: 16px; color: var(--text-secondary); font-size: 0.95rem;">
+                    Jika preview tidak tampil, buka langsung: <a href="{{ module_info.file_url }}" target="_blank" style="color: #a29bfe; text-decoration: underline;">Buka PDF di tab baru</a> atau unduh file.
                 </div>
                 {% elif module_info.embed_type == 'doc' %}
                 <div style="width: 100%; height: 600px; border: 1px solid var(--panel-border); border-radius: 12px; overflow: hidden; margin-bottom: 16px;">

@@ -115,6 +115,17 @@
             font-size: .85rem; font-weight: 700;
         }
 
+        .empty-message {
+            grid-column: 1 / -1;
+            padding: 32px 22px;
+            border-radius: 18px;
+            background: rgba(255,255,255,.08);
+            text-align: center;
+            color: rgba(255,255,255,.85);
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
         /* ---- Question card ---- */
         .question-area {
             flex: 1; display: flex; flex-direction: column; justify-content: center;
@@ -378,6 +389,7 @@
         const progressText = document.getElementById('progressText');
         const timerText = document.getElementById('timerText');
         const timerCircle = document.getElementById('timerCircle');
+        const quizFooter = document.querySelector('.quiz-footer');
         const scoreCorrect = document.getElementById('scoreCorrect');
         const scoreWrong = document.getElementById('scoreWrong');
         const scoreXP = document.getElementById('scoreXP');
@@ -388,6 +400,18 @@
         const feedbackSub = document.getElementById('feedbackSub');
 
         function renderQuestion() {
+            if (!questions.length) {
+                qNumber.textContent = '';
+                qText.textContent = 'Tidak ada soal kuis untuk misi ini saat ini.';
+                optionsGrid.innerHTML = '<div class="empty-message">Silakan kembali ke halaman misi atau hubungi pengajar.</div>';
+                progressFill.style.width = '0%';
+                progressText.textContent = '0 / 0';
+                timerText.textContent = '';
+                timerCircle.style.strokeDashoffset = CIRCUMFERENCE;
+                quizFooter.style.display = 'none';
+                return;
+            }
+
             const q = questions[currentQ];
             qNumber.textContent = 'SOAL ' + (currentQ + 1);
             qText.textContent = q.text;
