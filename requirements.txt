@@ -3,3 +3,5 @@ pytest
 pytest-django
 streamlit
 djangorestframework
+Pillow
+python-dotenv
