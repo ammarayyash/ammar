@@ -1,4 +1,7 @@
-import streamlit as st
+try:
+    import streamlit as st
+except ImportError:
+    st = None  # Streamlit not required for Django; ignore if unavailable
 
 st.set_page_config(page_title="Projek PSBI", layout="wide")
 
