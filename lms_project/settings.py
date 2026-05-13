@@ -117,8 +117,13 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# Tambahkan folder static dari setiap app agar collectstatic menemukannya
+STATICFILES_DIRS = [
+    BASE_DIR / 'dashboard' / 'static',
+]
 
 # Media files (user uploads)
 MEDIA_URL = '/media/'
