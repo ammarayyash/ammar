@@ -691,23 +691,44 @@ def materi_view(request, mission_id):
         file_url = mission.module_file.url
         module_info = build_module_info(filename, file_url)
     else:
-        media_modul_dir = os.path.join(settings.MEDIA_ROOT, 'modul')
-        if os.path.exists(media_modul_dir):
-            module_files = [f for f in os.listdir(media_modul_dir) if os.path.isfile(os.path.join(media_modul_dir, f))]
+        search_dirs = [
+            os.path.join(settings.MEDIA_ROOT, 'modul'),
+            os.path.join(settings.MEDIA_ROOT, 'modules'),
+        ]
+        patterns = [
+            f'modul{mission.order}',
+            f'level{mission.order}',
+            f'materi{mission.order}',
+            f'missi{mission.order}',
+            f'mission{mission.order}',
+            f'materi{mission.id}',
+            f'mission{mission.id}',
+        ]
+        found_file = None
+        for dir_path in search_dirs:
+            if not os.path.exists(dir_path):
+                continue
+            module_files = [f for f in os.listdir(dir_path) if os.path.isfile(os.path.join(dir_path, f))]
             for filename in module_files:
-                # Check for various naming patterns
-                if (filename.lower().startswith(f'modul{mission.order}') or 
-                    filename.lower().startswith(f'level{mission.order}') or
-                    f'{mission.order}' in filename.lower()):
-                    file_path = os.path.join('modul', filename)
-                    file_url = f"{settings.MEDIA_URL}{file_path}"
-                    module_info = build_module_info(filename, file_url)
+                lower_name = filename.lower()
+                if any(lower_name.startswith(pattern) or pattern in lower_name for pattern in patterns):
+                    found_file = (dir_path, filename)
                     break
-            if not module_info and module_files:
-                filename = module_files[0]
-                file_path = os.path.join('modul', filename)
-                file_url = f"{settings.MEDIA_URL}{file_path}"
-                module_info = build_module_info(filename, file_url)
+            if found_file:
+                break
+        if not found_file:
+            for dir_path in search_dirs:
+                if os.path.exists(dir_path):
+                    module_files = [f for f in os.listdir(dir_path) if os.path.isfile(os.path.join(dir_path, f))]
+                    if module_files:
+                        found_file = (dir_path, module_files[0])
+                        break
+        if found_file:
+            dir_path, filename = found_file
+            rel_dir = os.path.relpath(dir_path, settings.MEDIA_ROOT).replace('\\', '/')
+            file_path = os.path.join(rel_dir, filename).replace('\\', '/')
+            file_url = f"{settings.MEDIA_URL}{file_path}"
+            module_info = build_module_info(filename, file_url)
     
     context = {
         'mission': mission,
