@@ -34,12 +34,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 1. Sidebar Active State Handling Based on URL
-    const currentLocation = location.pathname.split("/").pop();
+    const currentPath = location.pathname.replace(/\/$/, '');
     const navLinks = document.querySelectorAll('.sidebar-nav a');
     
     navLinks.forEach(link => {
-        const linkHref = link.getAttribute('href');
-        if (linkHref === currentLocation || (currentLocation === '' && linkHref === 'index.html')) {
+        const linkHref = link.getAttribute('href').replace(/\/$/, '');
+        if (linkHref === currentPath || (currentPath === '' && (linkHref === '' || linkHref === '/'))) {
             document.querySelectorAll('.sidebar-nav li').forEach(nav => nav.classList.remove('active'));
             link.parentElement.classList.add('active');
         }
