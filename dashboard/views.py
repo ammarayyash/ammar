@@ -207,6 +207,7 @@ def _safe_int(value, default=0):
 def komunitas(request):
     if request.method == 'POST':
         token = (request.POST.get('token') or '').strip()
+        token = ''.join(token.split())
         if not token:
             messages.error(request, 'Masukkan token ruang kelas terlebih dahulu.')
             return redirect('komunitas')
@@ -313,6 +314,7 @@ def admin_community_rooms(request):
         if action in ('create_room', 'update_room'):
             name = (request.POST.get('name') or '').strip()
             token = (request.POST.get('token') or '').strip().upper()
+            token = ''.join(token.split())
             description = (request.POST.get('description') or '').strip()
             content = (request.POST.get('content') or '').strip()
             content_mode = request.POST.get('content_mode') or 'both'
@@ -653,46 +655,51 @@ def materi_view(request, mission_id):
         progress.status = 'reading'
         progress.save()
     
-    # Check for automatic module file
+    # Check for module file and automatic module detection
     module_info = None
     import os
     from django.conf import settings
-    media_modul_dir = os.path.join(settings.MEDIA_ROOT, 'modul')
-    if os.path.exists(media_modul_dir):
-        for filename in os.listdir(media_modul_dir):
-            # Check for various naming patterns
-            if (filename.lower().startswith(f'modul{mission.order}') or 
-                filename.lower().startswith(f'level{mission.order}') or
-                f'{mission.order}' in filename.lower()):
-                file_path = os.path.join('modul', filename)
-                file_url = f"{settings.MEDIA_URL}{file_path}"
-                
-                # Determine file type and embed method
-                if filename.lower().endswith('.pdf'):
-                    embed_type = 'pdf'
-                    # serve via Django view to ensure correct headers (inline)
-                    try:
-                        embed_url = reverse('serve_modul_pdf', args=[filename])
-                    except Exception:
-                        embed_url = file_url
-                elif filename.lower().endswith(('.doc', '.docx')):
-                    embed_type = 'doc'
-                    # Use Google Docs viewer for DOC files
-                    embed_url = f"https://docs.google.com/viewer?url={request.build_absolute_uri(file_url)}&embedded=true"
-                elif filename.lower().endswith(('.txt', '.md')):
-                    embed_type = 'text'
-                    embed_url = file_url
-                else:
-                    embed_type = 'download'
-                    embed_url = file_url
-                
-                module_info = {
-                    'filename': filename,
-                    'file_url': file_url,
-                    'embed_type': embed_type,
-                    'embed_url': embed_url,
-                }
-                break
+
+    def build_module_info(filename, file_url):
+        lower_name = filename.lower()
+        if lower_name.endswith('.pdf'):
+            embed_type = 'pdf'
+            try:
+                embed_url = reverse('serve_modul_pdf', args=[filename])
+            except Exception:
+                embed_url = file_url
+        elif lower_name.endswith(('.doc', '.docx')):
+            embed_type = 'doc'
+            embed_url = f"https://docs.google.com/viewer?url={request.build_absolute_uri(file_url)}&embedded=true"
+        elif lower_name.endswith(('.txt', '.md')):
+            embed_type = 'text'
+            embed_url = file_url
+        else:
+            embed_type = 'download'
+            embed_url = file_url
+        return {
+            'filename': filename,
+            'file_url': file_url,
+            'embed_type': embed_type,
+            'embed_url': embed_url,
+        }
+
+    if mission.module_file:
+        filename = os.path.basename(mission.module_file.name)
+        file_url = mission.module_file.url
+        module_info = build_module_info(filename, file_url)
+    else:
+        media_modul_dir = os.path.join(settings.MEDIA_ROOT, 'modul')
+        if os.path.exists(media_modul_dir):
+            for filename in os.listdir(media_modul_dir):
+                # Check for various naming patterns
+                if (filename.lower().startswith(f'modul{mission.order}') or 
+                    filename.lower().startswith(f'level{mission.order}') or
+                    f'{mission.order}' in filename.lower()):
+                    file_path = os.path.join('modul', filename)
+                    file_url = f"{settings.MEDIA_URL}{file_path}"
+                    module_info = build_module_info(filename, file_url)
+                    break
     
     context = {
         'mission': mission,
@@ -817,11 +824,20 @@ def kuis_view(request, mission_id):
 def evaluasi_view(request, mission_id):
     mission = Mission.objects.get(id=mission_id)
     progress = UserMissionProgress.objects.get(user=request.user, mission=mission)
-    
-    # Get questions that were answered incorrectly
-    wrong_answers = UserAnswer.objects.filter(user=request.user, question__mission=mission, is_correct=False)
-    questions = [wa.question for wa in wrong_answers]
-    
+
+    answered_questions = UserAnswer.objects.filter(user=request.user, question__mission=mission)
+    wrong_question_ids = set(answered_questions.filter(is_correct=False).values_list('question_id', flat=True))
+    answered_question_ids = set(answered_questions.values_list('question_id', flat=True))
+    all_question_ids = set(mission.questions.values_list('id', flat=True))
+    unanswered_question_ids = all_question_ids - answered_question_ids
+
+    question_ids_to_review = list(wrong_question_ids | unanswered_question_ids)
+    questions = list(Question.objects.filter(id__in=question_ids_to_review).order_by('order'))
+
+    if not questions:
+        messages.warning(request, 'Tidak ada soal evaluasi yang tersedia. Silakan ulang kuis.')
+        return redirect('misi_kuis', mission_id=mission.id)
+
     if request.method == 'POST':
         # Mark activity date for today
         profile = request.user.userprofile
