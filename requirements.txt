@@ -1,3 +1,4 @@
 Django>=3.2,<7
 djangorestframework
 Pillow
+whitenoise==6.6.0
