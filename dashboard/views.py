@@ -667,9 +667,9 @@ def materi_view(request, mission_id):
         if lower_name.endswith('.pdf'):
             embed_type = 'pdf'
             try:
-                embed_url = reverse('serve_modul_pdf', args=[filename])
+                embed_url = request.build_absolute_uri(reverse('serve_modul_pdf', args=[filename]))
             except Exception:
-                embed_url = file_url
+                embed_url = request.build_absolute_uri(file_url)
         elif lower_name.endswith(('.doc', '.docx')):
             embed_type = 'doc'
             embed_url = f"https://docs.google.com/viewer?url={request.build_absolute_uri(file_url)}&embedded=true"

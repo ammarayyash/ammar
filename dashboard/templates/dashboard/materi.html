@@ -395,7 +395,12 @@
                 
                 {% if module_info.embed_type == 'pdf' %}
                 <div style="width: 100%; height: 640px; border: 1px solid var(--panel-border); border-radius: 12px; overflow: hidden; margin-bottom: 16px; background: var(--bg-primary);">
-                    <iframe src="{{ module_info.embed_url }}" width="100%" height="100%" style="border: none; min-height: 640px;"></iframe>
+                    <object data="{{ module_info.embed_url }}" type="application/pdf" width="100%" height="100%">
+                        <div style="padding: 32px; color: var(--text-secondary); text-align: center;">
+                            <p>Preview PDF tidak tersedia di browser ini.</p>
+                            <p><a href="{{ module_info.file_url }}" target="_blank" style="color: #a29bfe; text-decoration: underline;">Buka PDF di tab baru</a> atau unduh file.</p>
+                        </div>
+                    </object>
                 </div>
                 <div style="margin-bottom: 16px; color: var(--text-secondary); font-size: 0.95rem;">
                     Jika preview tidak tampil, buka langsung: <a href="{{ module_info.file_url }}" target="_blank" style="color: #a29bfe; text-decoration: underline;">Buka PDF di tab baru</a> atau unduh file.
